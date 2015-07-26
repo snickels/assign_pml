@@ -1,7 +1,7 @@
 ---
 title: "Practical Machine Learning Assignment"
 author: "Stefan Nickels"
-date: "20. July 2015"
+date: "26. July 2015"
 output: html_document
 ---
 
