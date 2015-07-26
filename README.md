@@ -5,3 +5,6 @@ assignment for coursera class practical machine learning
 test git text bla 
 
 hallo rstudio
+
+
+ok, hallo github
