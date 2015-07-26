@@ -11,13 +11,35 @@ output: html_document
 
 ```{r load}
 train <- read.csv("data/pml-training.csv", 
-                  na.strings = "",
+                  na.strings = c("", "NA", "#DIV/0!"),
                   stringsAsFactors = FALSE)
 
 test <- read.csv("data/pml-testing.csv",
-                 na.strings = "",
+                 na.strings = c("", "NA"), 
                  stringsAsFactors = FALSE)
 # check
+
+str(train)
+
+# proportion of missings
+table(round(colSums(is.na(train))/nrow(train)*100), digits=1)
+
+# delete columns with missings >95
+
+colSums(is.na(train))
+
+table(train$skewness_yaw_dumbbell)
+summary(train$kurtosis_roll_arm)
+str(train$kurtosis_roll_arm)
+
+kurtosis_roll_arm
+sum(is.na(train$kurtosis_roll_belt))
+sum(is.na(train$max_roll_belt))
+table(train$max_roll_belt)
+dim(train)
+
+
+# train[ , colSums(is.na(train)) < 0.95 * nrow(train)]
 
 ```
 
