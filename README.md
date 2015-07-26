@@ -9,7 +9,6 @@ output: html_document
 
 # Load and prepare data
 
-<<<<<<< HEAD
 ```{r load}
 train <- read.csv("data/pml-training.csv", 
                   na.strings = "",
@@ -41,9 +40,4 @@ summary(test)
 
 
 <2000 Words, <5 figures
-=======
-hallo rstudio
 
-
-ok, hallo github
->>>>>>> c5eff8849792f96f0fa2c5d672ab795ad63a4f35
