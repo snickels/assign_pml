@@ -7,59 +7,72 @@ output: html_document
 
 # Introduction
 
-# Load and prepare data
+Background Info:
+
+Tracking device data from six young health participants, performing barbell lifts in five forms:  
+* A: exactly according to the specification
+* B: throwing the elbows to the front
+* C: lifting the dumbbell only halfway
+* D: lowering the dumbbell only halfway
+* E: throwing the hips to the front (Class E)
+
+Read more: http://groupware.les.inf.puc-rio.br/har#ixzz4962NQyaS
+
+# Load data
 
 ```{r load}
-train <- read.csv("data/pml-training.csv", 
+
+library("caret", lib.loc="~/Library/R/3.0/library")
+training <- read.csv("data/pml-training.csv", 
                   na.strings = c("", "NA", "#DIV/0!"),
-                  stringsAsFactors = FALSE)
+                  stringsAsFactors = TRUE)
 
-test <- read.csv("data/pml-testing.csv",
+testing <- read.csv("data/pml-testing.csv",
                  na.strings = c("", "NA"), 
-                 stringsAsFactors = FALSE)
-# check
+                 stringsAsFactors = TRUE)
+                 
+                 
+```
 
-str(train)
+# Check and prepare data
 
+```{r clean}                
 # proportion of missings
-table(round(colSums(is.na(train))/nrow(train)*100), digits=1)
+table(round(colSums(is.na(training))/nrow(training)*100))
 
 # delete columns with missings >95
+training <- training[ , colSums(is.na(training)) < 0.95]
 
-colSums(is.na(train))
-
-table(train$skewness_yaw_dumbbell)
-summary(train$kurtosis_roll_arm)
-str(train$kurtosis_roll_arm)
-
-kurtosis_roll_arm
-sum(is.na(train$kurtosis_roll_belt))
-sum(is.na(train$max_roll_belt))
-table(train$max_roll_belt)
-dim(train)
+str(training)
+summary(training)
 
 
-# train[ , colSums(is.na(train)) < 0.95 * nrow(train)]
+# delete specific colums
+# http://stackoverflow.com/questions/36110486/unable-to-delete-columns-in-r
+
+drops <- c('X')
+training <- training[ , !(names(training) %in% drops)]
+
+
+table(trainclean$user_name)
 
 ```
 
-```{r clean}
-str(train)
-summary(train)
-table(train$skewness_yaw_belt)
+```{r building model}
+set.seed(12345)
+model <- train(classe ~., data = training, method = "glm")
+# preprocessing options
 
+# TODO: take care of tights (individuals)
+# standardize values (also test set with values from )
 
-str(test)
-summary(test)
-
-# TODO: clean all variables detected as character (assuming values mixed with error codes)
-# TODO: delete useless variables in
-# TODO: delete all variables with mostly missing
-# TODO: delete all variables with only missings in test data set
-# TODO: apply same to test data if similar problems
 ```
 
 
+```{r prediction}
+
+
+```
 
 <2000 Words, <5 figures
 
