@@ -2,7 +2,10 @@
 title: "Practical Machine Learning Assignment"
 author: "Stefan Nickels"
 date: "20. May 2016"
-output: html_document
+output: 
+  html_document: 
+    number_sections: yes
+    toc: yes
 ---
 
 # Introduction
