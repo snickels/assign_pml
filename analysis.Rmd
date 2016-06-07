@@ -1,0 +1,159 @@
+---
+title: "Practical Machine Learning Assignment"
+author: "Stefan Nickels"
+date: "07. June 2016"
+output: 
+  html_document: 
+    fig_caption: yes
+    number_sections: yes
+    toc: yes
+---
+
+# Introduction
+
+The task is to predict the quality of barbell lifts based on tracking device
+data from six young health participants. The categories to predict are the following:  
+
+* exactly according to the specification (A)
+* throwing the elbows to the front (B)
+* lifting the dumbbell only halfway (C)
+* lowering the dumbbell only halfway (D)
+* throwing the hips to the front (E)
+
+
+For more details, please refer to http://groupware.les.inf.puc-rio.br/har#ixzz4962NQyaS
+
+# Methods
+
+For practical reasons, I excluded all variables with a missing proportion above 
+95%. I will consider the imputation of missing values as an alternative approach 
+only if the model performance turns out to be low.
+I further checked the variability of the variables and excluded non-informative variables, i.e. with a variability near zero. 
+Although I was not able to clarify the meaning of all variables, I decided to include all of them. Especially the timestamp and window variables are cryptic, and I decided to keep them even if their variability will turn out to be low, because they might be important.
+
+I centered and scaled all continuous variables.  
+
+I used the random forest approach because of its robustness, flexibility and 
+performance.
+
+To avoid overfittung and to estimate the out of sample error I used 10 fold cross validation (3 repetitions). I used the accuracy as a metric to judge the model performance. I aimed to reach an accuracy of 0.99. 
+
+I used the following R version and R packages:
+
+```{r packages}
+R.version.string
+library("caret")
+library("e1071")
+library("randomForest")
+```
+
+
+## Data preparation
+
+### Load data
+
+```{r load}
+training <- read.csv("data/pml-training.csv", 
+                  na.strings = c("", "NA", "#DIV/0!"),
+                  stringsAsFactors = TRUE)
+
+testing <- read.csv("data/pml-testing.csv",
+                 na.strings = c("", "NA"), 
+                 stringsAsFactors = TRUE)
+
+```
+
+### Check and prepare data
+
+```{r missing}
+dim(training)
+
+# proportion of missings
+table(round(colSums(is.na(training))/nrow(training)*100))
+```
+
+```{r plot missing}
+plot(table(round(colSums(is.na(training))/nrow(training)*100)),
+     main = "Overview of missing values",
+     xlab = "Percentage of missing values",
+     ylab = "n (variables)")
+
+abline (v=95, col = "red")
+```
+
+
+```{r clean}                
+# delete columns with missings >95
+training <- training[ , colSums(is.na(training)) < 0.95]
+# delete row name column
+# http://stackoverflow.com/questions/36110486/unable-to-delete-columns-in-r
+
+drops <- c('X')
+training <- training[ , !(names(training) %in% drops)]
+
+# check for non-informative variables
+nsr <- nearZeroVar(training, saveMetrics = TRUE)
+
+print(nsr) 
+
+table(training$classe)
+dim(training)
+```
+Of all 5 outcomes, outcome A occurred more frequently (n about 5500) than the others (n about 3500), but this should be ok for training the model. 
+The raw data consisted of 160 variables of 19622 observations. After quality control, 59 variables are left to train the model.
+
+
+### Building the prediction model
+
+I used the training parameters as described in the methods section. 
+
+```{r building model}
+set.seed(12345) # for ensuring reproducibility
+
+#proofofprinciple
+trainingsample <- training[sample(1:nrow(training), 300,
+                            replace=FALSE), ] 
+
+ctrl <- trainControl(method = "repeatedcv",
+                      repeats = 3,
+                      classProbs = TRUE)
+
+trainedmodel <- train(classe ~., data = trainingsample, 
+                      preProcess=c("center", "scale"), 
+                      method = "rf",
+                      trControl = ctrl)
+
+
+# now for real
+# trainedmodel <- train(classe ~., data = training,
+#                       preProcess=c("center", "scale"),
+#                       method = "rf",
+#                       trControl = ctrl)
+```
+
+# Results
+
+## Properties of model
+
+
+```{r results}
+print(trainedmodel)
+print(trainedmodel$finalModel)
+
+plot(trainedmodel, 
+     main = "Properties of the random forest prediction model",
+     xlab = "n (predictor variables)")
+```
+
+The accuracy of the best model was >0.99, using 41 variables for prediction.
+
+
+## Prediction of test cases
+
+I used the trained model to predict the outcomes of the 20 test cases.
+```{r prediction}
+predict(trainedmodel, testing)
+```
+
+
+
